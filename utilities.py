@@ -86,8 +86,8 @@ def print_graph(graph: nx.Graph, path: Sequence[int]=None) -> None:
                 colors.append("b")
             else:
                 colors.append("r")
-
-    colors = ["b" for _ in range(len(edges))]
+    else:
+        colors = ["b" for _ in range(len(edges))]
 
     nx.draw_networkx(graph, pos=g_pos, edgelist=edges, edge_color=colors, **options)
     nx.draw_networkx_edge_labels(graph, pos=g_pos, edge_labels=labels)
@@ -196,3 +196,9 @@ def add_to_path(path: List[int], edge: Tuple[int, int]) -> List[int]:
 
     return path
 
+def merge_paths(graph: nx.Graph, path_1: List[int], path_2: List[int]) -> List[int]:
+    new_path = []
+
+    inters = sorted(get_inter_edges(graph, path_1, path_2, True), key=lambda t: t[2].get('weight', 1))
+
+    return new_path
