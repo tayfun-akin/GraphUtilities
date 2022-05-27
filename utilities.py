@@ -1,6 +1,9 @@
 from typing import Tuple, List, Dict, Union, Sequence
+from xmlrpc.client import Boolean, boolean
+from cv2 import rotate
 import networkx as nx
 import matplotlib.pyplot as plt
+import numpy as np
 
 def create_test_graph() -> nx.Graph:
     """Creates a new graph, convenient for testing."""
@@ -9,14 +12,15 @@ def create_test_graph() -> nx.Graph:
     graph.add_edge(0, 1, weight=3)
     graph.add_edge(1, 2, weight=5)
     graph.add_edge(2, 3, weight=8)
+    graph.add_edge(4, 7, weight=3)
+    graph.add_edge(2, 5, weight=12)
     graph.add_edge(0, 2, weight=12)
     graph.add_edge(0, 3, weight=19)
     graph.add_edge(3, 1, weight=7)
-    graph.add_edge(3, 4, weight=8)
-    graph.add_edge(2, 5, weight=12)
+    graph.add_edge(3, 4, weight=2)
     graph.add_edge(3, 5, weight=6)
     graph.add_edge(4, 6, weight=7)
-    graph.add_edge(3, 7, weight=2)
+    graph.add_edge(3, 7, weight=8)
     graph.add_edge(4, 7, weight=3)
     graph.add_edge(4, 5, weight=5)
     graph.add_edge(7, 6, weight=12)
@@ -34,6 +38,9 @@ def create_path(graph: nx.Graph, path: List[int]=None) -> List[int]:
     if len(path) == (graph.number_of_nodes()):
         if graph.has_edge(path[0], path[-1]):
             path.append(path[0])
+
+            if (path[0] + 1 < path[1]):
+                path.reverse()
 
             return path
 
@@ -54,6 +61,9 @@ def create_path(graph: nx.Graph, path: List[int]=None) -> List[int]:
         if path_new == None:
             path.remove(edge[1])
             continue
+
+        if (path[0] + 1 < path[1]):
+                path.reverse()
 
         return path_new
 
@@ -196,9 +206,47 @@ def add_to_path(path: List[int], edge: Tuple[int, int]) -> List[int]:
 
     return path
 
-def merge_paths(graph: nx.Graph, path_1: List[int], path_2: List[int]) -> List[int]:
-    new_path = []
+def calc_path_cost(graph: nx.Graph, path: List[int]) -> int:
+    """Returns the overall cost of the given path."""
 
-    inters = sorted(get_inter_edges(graph, path_1, path_2, True), key=lambda t: t[2].get('weight', 1))
+    sum = 0
 
-    return new_path
+    for i in range(0, len(path) - 1):
+        data = graph.get_edge_data(path[i], path[i + 1])
+        sum += data['weight']
+
+    return sum
+
+def rotate_path(old_path: List[int], amount: int, dir: int=1) -> List[int]:
+    """Rotate the path, in the given direction, in the given amount."""
+
+    path = old_path.copy()
+
+    if path[0] == path[-1]:
+        path.pop()
+
+    path = list(np.roll(path, amount * -1))
+
+    path.append(path[0])
+
+    if dir == -1:
+        path.reverse()
+
+    return path
+
+def is_path_valid(graph: nx.Graph, path: List[int]) -> Boolean:
+    """Checks if the given path is a legal path (there exists an edge between all the adjacent
+    elements of the path)."""
+
+    for i in range(0, len(path) - 1):
+        if not graph.has_edge(path[i], path[i + 1]):
+            return False
+
+    return True
+
+def do_edges_share_nodes(edge_1: List[int], edge_2: List[int]) -> boolean:
+    """Returns True if the given edges share nodes."""
+
+    new_list = edge_1[0:2] + edge_2[0:2]
+
+    return not (len(new_list) == len(set(new_list)))
