@@ -22,3 +22,7 @@ relating to the edge, such as its 'weight'.
 - path_has_nodes(path: List, edge: Tuple) -> bool
 - path_has_edge(path: List, edge: Tuple) -> bool
 - add_to_path(path: List[int], edge: Tuple[int, int]) -> List[int]
+- calc_path_cost(graph: nx.Graph, path: List[int]) -> int
+- rotate_path(old_path: List[int], amount: int, dir: int=1) -> List[int]
+- is_path_valid(graph: nx.Graph, path: List[int]) -> Boolean
+- do_edges_share_nodes(edge_1: List[int], edge_2: List[int]) -> boolean
